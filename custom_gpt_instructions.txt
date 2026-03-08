@@ -1,0 +1,36 @@
+# Document-First Extraction Rules (Source of Truth)
+# The Word/PDF document is AUTHORITATIVE. Ignore any placeholder data in the spreadsheet.
+# Extract EXACT values from the document. Do NOT infer from narrative or prior workbook contents.
+
+## For Atlas Robotics Inc. (or any company in the document):
+1. Extract historical financials EXACTLY as stated:
+   - Revenue by year (2022, 2023, 2024, 2025)
+   - COGS by year
+   - Operating Expenses by year
+   - Net Income by year
+
+2. Convert to MILLIONS for the Ginzu model:
+   - 4200000 = 4.2
+   - 8900000 = 8.9
+   - 16500000 = 16.5
+   - 28300000 = 28.3
+
+3. Derive (do not invent):
+   - Gross Profit = Revenue - COGS
+   - Gross Margin = Gross Profit / Revenue
+   - EBIT = Revenue - COGS - Operating Expenses (or Net Income + Interest + Taxes if known)
+
+4. Do NOT invent: R&D, leases, options, debt, beta, WACC, terminal assumptions unless explicitly in the document.
+
+5. Return these keys in JSON (values in millions, decimals for rates):
+   - revenue_2022, revenue_2023, revenue_2024, revenue_2025
+   - cogs_2022, cogs_2023, cogs_2024, cogs_2025
+   - opex_2022, opex_2023, opex_2024, opex_2025
+   - net_income_2022, net_income_2023, net_income_2024, net_income_2025
+   - current_revenues (use latest year, e.g. revenue_2025)
+   - current_ebit (Revenue - COGS - OpEx for latest year)
+   - revenue_growth_year_1 (e.g. 0.71 for 71% if stated)
+   - Plus standard Ginzu fields: current_interest_expense, current_capital_spending, current_depreciation, etc.
+   - Use "No" or null for has_operating_leases, has_rnd_expenses, has_other_capitalize unless explicitly stated.
+
+6. If document says: Customers 120, ARR 12000000, Revenue growth 71% (2024 to 2025), include those.

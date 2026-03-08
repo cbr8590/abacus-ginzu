@@ -1,0 +1,22 @@
+#!/bin/bash
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+# MacOS -> Contents -> .app -> project folder (parent of .app)
+PROJECT_DIR="$(cd "$SCRIPT_DIR/../../.." && pwd)"
+cd "$PROJECT_DIR" || exit 1
+
+# Prefer venv if it exists
+PYTHON=""
+for v in "venv" ".venv" "env"; do
+  if [[ -x "$PROJECT_DIR/$v/bin/python" ]]; then
+    PYTHON="$PROJECT_DIR/$v/bin/python"
+    break
+  fi
+done
+[[ -z "$PYTHON" ]] && PYTHON="$(which python3 2>/dev/null || echo python3)"
+
+ERR=$(mktemp)
+if ! "$PYTHON" ginzu_app.py 2>"$ERR"; then
+  MSG=$(cat "$ERR" | head -5 | tr '\n' ' ' | sed "s/\"/'/g")
+  osascript -e "display dialog \"Ginzu failed to start:\n\n$MSG\n\nFix: Open Terminal, cd to the project folder, run: pip install -r requirements.txt\" with title \"Ginzu Autocomplete\" buttons {\"OK\"} default button 1 with icon stop"
+fi
+rm -f "$ERR"
